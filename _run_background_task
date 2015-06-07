@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+pidfile="$1"
+logfile="$2"
+cmd="$3"
+
+
+# shim so we're compatible with bash 3
+# [ -z "$BASHPID" ] && BASHPID="$(sh -c 'echo $PPID')"
+
+echo "$(date +%FT%T%z) $$ starting task: $cmd"
+
+if ! deploy/kill_background_task "$pidfile"; then
+  echo "aborting because we couldn't terminate '$pidfile'"
+  exit 2
+fi
+
+echo "$$" > "$pidfile"
+trap "rm -f '$pidfile'" INT TERM EXIT
+
+bash -c -l "$cmd"

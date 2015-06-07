@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+# usage: kill-background-task pidfile
+#
+# If you launched a background process using start-background-task,
+# this will do everything it can to kill it off.
+
+pidfile="$1"
+
+# kill any processes currently running
+if [ -f "$pidfile" ]; then
+  if ! kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    echo "$(date +%FT%T%z) deleted stale pidfile '$pidfile' for process $(cat "$pidfile")"
+    rm -f "$pidfile"
+  else
+    echo "$(date +%FT%T%z) asking process $(cat "$pidfile") pid '$pidfile' to terminate"
+    kill -TERM -"$(cat "$pidfile")"
+    sleep 2
+  fi
+fi
+
+if [ -f "$pidfile" ]; then
+  if ! kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    echo "$(date +%FT%T%z) deleted stale pidfile '$pidfile' for process $(cat "$pidfile")"
+    rm -f "$pidfile"
+  else
+    echo "$(date +%FT%T%z) trying to destroy $(cat "$pidfile") pid '$pidfile'"
+    kill -9 -"$(cat "$pidfile")"
+    sleep 5
+  fi
+fi
+
+if [ -f "$pidfile" ]; then
+  if ! kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    echo "$(date +%FT%T%z) deleted stale pidfile '$pidfile' for process $(cat "$pidfile")"
+    rm -f "$pidfile"
+  else
+    echo "$(date +%FT%T%z) could not destroy $(cat "$pidfile") pid '$pidfile'. Aborting!"
+    exit 2
+  fi
+fi
