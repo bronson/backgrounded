@@ -5,6 +5,10 @@
 * easy to embed in your project and also use from the command line.
 
 
+The command logs to its stdout.  You can redirect its stdout to
+your logfile if you want to keep it or to /dev/null if you don't.
+
+
 http://stackoverflow.com/questions/20449707/using-travis-ci-for-testing-on-unix-shell-scripts
 
 * `make test` (or just `make`)
