@@ -11,6 +11,10 @@ die() {
   exit 1
 }
 
+plural() {
+  [ ${1-0} -ne 1 ] && echo s
+}
+
 [ -d bin ] || die "you must run tests from the root of the repository"
 
 export PATH="./bin:$PATH"
@@ -20,4 +24,4 @@ for test in test/*_test.sh; do
   "$test" || ((failures++))
 done
 
-printf "\n$tests tests run, ${failures-0} failures.\n\n"
+printf "\n$tests test$(plural $tests) run, ${failures-0} failure$(plural $failures).\n\n"

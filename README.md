@@ -1,8 +1,8 @@
 * cross-platform
-  * works with bash 3
+  * works with bash 3 and bash 4
   * avoids nonstandard commands like setsid, start-stop-daemon, or nohup.
-* small, easy to understand (and commented where it isn't).
-* readable, easy to embed in your project and use from the command line.
+* small, easy to understand, and commented where it might not be.
+* easy to embed in your project and also use from the command line.
 
 
 http://stackoverflow.com/questions/20449707/using-travis-ci-for-testing-on-unix-shell-scripts
