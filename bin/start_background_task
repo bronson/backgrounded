@@ -34,4 +34,3 @@ deploy/_run_background_task "$@" >>"$logfile" 2>&1 </dev/null & disown
 # example commands to figure out -m:
 # bash -c 'set -m; echo parent=$$; bash -c '\''echo $$ | tee /tmp/pid; sleep 20; echo $$ done'\'' & disown'; sleep 1; kill -- -$(cat /tmp/pid)
 # bash -c -i 'bash -c '\''echo $$; sleep 10 & disown'\'' > /tmp/x'; kill -TERM -- -$(< /tmp/x)
-
