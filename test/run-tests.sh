@@ -16,8 +16,17 @@ plural() {
 }
 
 
+# ensures these files don't exist when the test starts
+# and that they're deleted when the test completes with no error
+prepare_files() {
+  # filenames can't contain whitespace
+  rm -f $@
+  test_files+=" $@"
+}
+
 check_result() {
   if [ "$expected" == "$actual" ]; then
+    rm -f $test_files
     echo -n '.'
   else
     echo
@@ -30,7 +39,7 @@ check_result() {
   fi
 }
 
-export -f check_result
+export -f prepare_files check_result
 
 
 [ -d bin ] || die "you must run tests from the root of the repository"

@@ -4,7 +4,7 @@
 # if the children don't get killed before they write, the test fails.
 
 set -e
-rm -f a.log
+prepare_files task a.log
 
 cat > task <<EOL
   echo start >> a.log
@@ -26,5 +26,4 @@ double the killer"
 # Terminated: 15"   # not sure about this line...  is it an OSX/BSDish thing?
 
 actual="$(cat a.log)"
-rm task a.log
 check_result "$actual" "$expected"

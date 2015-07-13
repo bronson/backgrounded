@@ -5,7 +5,7 @@
 
 
 set -e
-rm -f a.log
+prepare_files a.log
 
 # 'launcher' should come before 'task' in the logfile
 bash -c "bin/start_background_task a.pid a.log 'echo start >> a.log; sleep 10; echo task'"
@@ -24,5 +24,4 @@ double the killer
 Terminated: 15"   # not sure about this line...  is it an OSX/BSDish thing?
 
 actual="$(cat a.log)"
-rm a.log
 check_result "$actual" "$expected"
