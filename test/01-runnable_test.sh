@@ -21,16 +21,4 @@ task"
 
 actual="$(cat a.log)"
 rm a.log
-
-
-if [ "$expected" == "$actual" ]; then
-  echo -n '.'
-else
-  echo
-  echo "$0 GOT <<"
-  echo "$actual"
-  echo ">> BUT EXPECTED <<"
-  echo "$expected"
-  echo ">>"
-  exit 1
-fi
+check_result "$actual" "$expected"

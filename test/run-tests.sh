@@ -15,6 +15,24 @@ plural() {
   [ ${1-0} -ne 1 ] && echo s
 }
 
+
+check_result() {
+  if [ "$expected" == "$actual" ]; then
+    echo -n '.'
+  else
+    echo
+    echo "$0 GOT <<"
+    echo "$actual"
+    echo ">> BUT EXPECTED <<"
+    echo "$expected"
+    echo ">>"
+    exit 1
+  fi
+}
+
+export -f check_result
+
+
 [ -d bin ] || die "you must run tests from the root of the repository"
 
 export PATH="./bin:$PATH"
