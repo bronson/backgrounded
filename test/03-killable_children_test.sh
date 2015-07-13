@@ -26,7 +26,7 @@ double the killer"
 # Terminated: 15"   # not sure about this line...  is it an OSX/BSDish thing?
 
 actual="$(cat a.log)"
-rm a.log
+rm task a.log
 
 
 if [ "$expected" == "$actual" ]; then
