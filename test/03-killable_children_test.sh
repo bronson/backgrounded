@@ -10,15 +10,15 @@ cat > task <<EOL
   echo start >> a.log
 EOL
 
-bash -c "bin/start_background_task a.pid a.log 'exec bash task'"
+bin/start_background_task a.pid a.log 'exec bash task'
 
 # wait for subprocess to log its start
 while ! grep -q start a.log; do sleep 0.1; done
 
 echo 'double the killer' >> a.log
-bash -c "bin/kill_background_task a.pid" > /dev/null
+bin/kill_background_task a.pid > /dev/null
 
-# wait for subprocess to stop (on mac it's at least 0.5 seconds)
+# wait for subprocess to stop (on mac it appears to be at least 0.5 seconds)
 while [ -f a.pid ]; do sleep 0.1; done
 
 expected="start

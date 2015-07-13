@@ -8,13 +8,13 @@ set -e
 prepare_files a.log
 
 # 'launcher' should come before 'task' in the logfile
-bash -c "bin/start_background_task a.pid a.log 'echo start >> a.log; sleep 10; echo task'"
+bin/start_background_task a.pid a.log 'echo start >> a.log; sleep 10; echo task'
 
 # wait for subprocess to log its start
 while ! grep -q start a.log; do sleep 0.1; done
 
 echo 'double the killer' >> a.log
-bash -c "bin/kill_background_task a.pid" > /dev/null
+bin/kill_background_task a.pid > /dev/null
 
 # wait for subprocess to stop (on mac it's at least 0.5 seconds)
 while [ -f a.pid ]; do sleep 0.1; done

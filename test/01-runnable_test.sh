@@ -8,7 +8,7 @@ set -e
 prepare_files a.log
 
 # 'launcher' should come before 'task' in the logfile
-bash -c "bin/start_background_task a.pid a.log 'sleep 0.1; echo task'"
+bin/start_background_task a.pid a.log 'sleep 0.1; echo task'
 echo launcher >> a.log
 
 # wait for subprocess to start
