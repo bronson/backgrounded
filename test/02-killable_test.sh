@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # this test starts a background task that sleeps and then writes to the logfile.
-# if the foreground writes complete before the background, the test passes.
+# the test passes if the background process is killed before it writes.
 
 
 set -e
@@ -30,9 +30,11 @@ rm a.log
 if [ "$expected" == "$actual" ]; then
   echo -n '.'
 else
-  echo EXPECTED:
-  echo "$expected"
-  echo "ACTUAL:"
+  echo
+  echo "$0 GOT <<"
   echo "$actual"
+  echo ">> BUT EXPECTED <<"
+  echo "$expected"
+  echo ">>"
   exit 1
 fi

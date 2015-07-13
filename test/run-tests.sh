@@ -2,8 +2,8 @@
 
 # Justification:
 # Writing this is probably the final nail in the coffin for tmtest.
-# I tried to like shunit2 before deciding it would take less time just
-# to roll my own.  Great overview of testing in the shell:
+# I tried to like shunit2 before realizing it would take less time just
+# to roll my own.  Good overview of testing in the shell:
 # https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/
 
 die() {

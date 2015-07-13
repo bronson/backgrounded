@@ -26,9 +26,11 @@ rm a.log
 if [ "$expected" == "$actual" ]; then
   echo -n '.'
 else
-  echo EXPECTED:
-  echo "$expected"
-  echo "ACTUAL:"
+  echo
+  echo "$0 GOT <<"
   echo "$actual"
+  echo ">> BUT EXPECTED <<"
+  echo "$expected"
+  echo ">>"
   exit 1
 fi
