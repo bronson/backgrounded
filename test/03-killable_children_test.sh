@@ -11,7 +11,7 @@ cat > task <<EOL
   echo start >> a.log
 EOL
 
-bin/start_background_task a.pid a.log 'exec bash task'
+bin/backgrounded a.pid a.log 'exec bash task'
 
 # wait for subprocess to log its start
 while [ ! -f a.log ]; do sleep 0.1; done

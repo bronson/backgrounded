@@ -8,7 +8,7 @@ set -e
 prepare_files a.log
 
 # processes are running concurrently if 'launcher' appears before 'task'
-bin/start_background_task a.pid a.log 'sleep 0.1; echo task'
+bin/backgrounded a.pid a.log 'sleep 0.1; echo task'
 echo launcher >> a.log
 
 # wait for subprocess to start
