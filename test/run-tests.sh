@@ -53,3 +53,4 @@ for test in test/*_test.sh; do
 done
 
 printf "\n$tests test$(plural $tests) run, ${failures-0} failure$(plural $failures).\n\n"
+[ -z "$failures" ] || exit 1
