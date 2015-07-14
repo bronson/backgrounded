@@ -57,14 +57,18 @@ backgrounded logs to its stdout.  You can redirect its stdout to
 your logfile if you want to keep it or to /dev/null if you don't.
 
 
-## Developing
+## Testing
 
 * `make test` (or just `make`)
+
+You can also run individual tests by launching them directly.
+
+* `test/01-runnable_test.sh`
+* `test/03-killable_children_test.sh`
 
 
 ## Roadmap
 
-* make tests individually runnable
 * complete rename to backgrounded
 * allow naming processes
 * test killing children / process group

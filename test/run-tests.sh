@@ -19,6 +19,7 @@ plural() {
 [ -d bin ] || die "you must run tests from the root of the repository"
 
 export PATH="./bin:$PATH"
+export test_environment=1  # tell the tests there's a test runner
 
 for test in test/*_test.sh; do
   ((tests++));
