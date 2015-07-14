@@ -56,6 +56,7 @@ your logfile if you want to keep it or to /dev/null if you don't.
 
 ## Roadmap
 
+* make tests individually runnable
 * complete rename
 * test status
 
