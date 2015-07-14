@@ -1,3 +1,3 @@
 language: bash
-script: bash test/run_tests.sh
+script: test/run-tests.sh
 sudo: false
