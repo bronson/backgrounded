@@ -4,7 +4,7 @@
 # the test passes if the background process is killed before it writes.
 
 
-set -e
+. test/test-helper.sh
 prepare_files a.log
 
 # 'launcher' should come before 'task' in the logfile

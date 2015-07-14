@@ -4,7 +4,7 @@
 # if the foreground writes complete before the background, the test passes.
 
 
-set -e
+. test/test-helper.sh
 prepare_files a.log
 
 # 'launcher' should come before 'task' in the logfile
