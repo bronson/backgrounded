@@ -7,7 +7,7 @@
 . test/test-helper.sh
 prepare_files a.log
 
-# 'launcher' should come before 'task' in the logfile
+# processes are running concurrently if 'launcher' appears before 'task'
 bin/start_background_task a.pid a.log 'sleep 0.1; echo task'
 echo launcher >> a.log
 

@@ -13,6 +13,7 @@ EOL
 bin/start_background_task a.pid a.log 'exec bash task'
 
 # wait for subprocess to log its start
+while [ ! -f a.log ]; do sleep 0.1; done
 while ! grep -q start a.log; do sleep 0.1; done
 
 echo 'double the killer' >> a.log
@@ -25,5 +26,5 @@ expected="start
 double the killer"
 
 # some systems output 'Terminated: 15' when the process is terminated, others don't.
-actual="$(cat a.log | grep -v 'Terminated: 15')"
+actual="$(cat a.log | grep -v '^Terminated')"
 check_result "$actual" "$expected"

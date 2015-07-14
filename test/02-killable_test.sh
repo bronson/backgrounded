@@ -11,6 +11,7 @@ prepare_files a.log
 bin/start_background_task a.pid a.log 'echo start >> a.log; sleep 10; echo task'
 
 # wait for subprocess to log its start
+while [ ! -f a.log ]; do sleep 0.1; done
 while ! grep -q start a.log; do sleep 0.1; done
 
 echo 'double the killer' >> a.log
