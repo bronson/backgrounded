@@ -1,13 +1,13 @@
 ## Backgrounded [![Build Status](https://travis-ci.org/bronson/backgrounded.svg)](https://travis-ci.org/bronson/backgrounded)
 
-Maintain your background tasks.  Start something and gtfo.
+Maintain your background tasks.  Launch and gtfo.
 
 
 ## Features
 
 * full service: start tasks, stop them, and get their status.
 * cross-platform
-  * works with bash 3 and bash 4.
+  * works with Bash 3 & 4 in any posix environment: Mac/Linux/BSD/etc.
   * avoids nonstandard commands like setsid, start-stop-daemon, and nohup.
 * small, easy to understand, and well commented where it isn't.
 * easy to embed in your project and use from the command line.
@@ -29,7 +29,15 @@ It also makes it the process group leader so any subprocesses it starts will
 be terminated too.  Since you didn't give the command a name, the
 pidfile will be named `background.pid`.
 
-You can check on it from time to time, or just stop it:
+But why wasn't there any output??  Because it detached from your session.
+The output disappeared into the void.
+If you redirect to a file, you'll see it's alive and well.
+
+```bash
+backgrounded 'echo $$: `date` >> /tmp/log; sleep 1'
+```
+
+You can check on the backgrounded command from time to time, or just stop it:
 
 ```bash
 backgrounded status
@@ -57,8 +65,10 @@ your logfile if you want to keep it or to /dev/null if you don't.
 ## Roadmap
 
 * make tests individually runnable
-* complete rename
-* test status
+* complete rename to backgrounded
+* allow naming processes
+* test killing children / process group
+* test status command
 
 
 ## Writing a Good Background Task

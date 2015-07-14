@@ -21,8 +21,8 @@ bin/kill_background_task a.pid > /dev/null
 while [ -f a.pid ]; do sleep 0.1; done
 
 expected="start
-double the killer
-Terminated: 15"   # not sure about this line...  is it an OSX/BSDish thing?
+double the killer"
 
-actual="$(cat a.log)"
+# some systems output 'Terminated: 15' when the process is terminated, others don't.
+actual="$(cat a.log | grep -v '^Terminated')"
 check_result "$actual" "$expected"
