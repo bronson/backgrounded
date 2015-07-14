@@ -3,7 +3,7 @@
 # this test starts a background task that sleeps and then writes to the logfile.
 # the test passes if the background process is killed before it writes.
 
-
+set -e
 . test/test-helper.sh
 prepare_files a.log
 

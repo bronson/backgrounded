@@ -3,6 +3,7 @@
 # this test fires off some children that sleep and then write...
 # if the children don't get killed before they write, the test fails.
 
+set -e
 . test/test-helper.sh
 prepare_files task a.log
 
