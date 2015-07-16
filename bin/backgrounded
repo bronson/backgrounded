@@ -134,12 +134,15 @@ if [ "$operation" = start ]; then
     exit 1
   fi
 
-  do_kill "$(find_file pid)"
+  fpid="$(find_file pid)"
+  flog="$(find_file log)"
+
+  do_kill "$pidfile"
 
   # set monitor mode so the child becomes a process group leader.
   # if you don't do this, and the parent exits, the group can't be killed.
   set -m
 
   # disown so the child runs no matter what happens to the parent
-  bin/_run_background_task "$(find_file pid)" "$(find_file log)" "echo" >>"$(find_file log)" 2>&1 </dev/null & disown
+  bin/_run_background_task "$fpid" "$flog" "$command" >>"$flog" 2>&1 </dev/null & disown
 fi
