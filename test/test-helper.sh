@@ -29,3 +29,12 @@ check_result() {
     exit 1
   fi
 }
+
+
+block_until_task_starts() {
+  while [ ! -f "$1" ]; do sleep 0.1; done
+}
+
+block_until_task_stops() {
+  while [ -f "$1" ]; do sleep 0.1; done
+}

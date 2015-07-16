@@ -11,10 +11,8 @@ prepare_files a.log
 bin/backgrounded a.pid a.log 'sleep 0.1; echo task'
 echo launcher >> a.log
 
-# wait for subprocess to start
-while [ ! -f a.pid ]; do sleep 0.1; done
-# wait for subprocess to stop (on mac it's at least 0.5 seconds)
-while [ -f a.pid ]; do sleep 0.1; done
+block_until_task_starts a.pid
+block_until_task_stops a.pid
 
 expected="launcher
 task"
