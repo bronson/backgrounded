@@ -119,7 +119,9 @@ start_run() {
     [ -z "$BASHPID" ] && BASHPID="$(sh -c 'echo $PPID')"
     echo "$BASHPID" > "$fpid"
     trap "rm -f '$fpid'" INT TERM EXIT
-    bash -c -l "$command"
+    bash -c -l "$command" &
+    wait $!
+    exit $?
   ) >>"$flog" 2>&1 </dev/null & disown
 }
 
