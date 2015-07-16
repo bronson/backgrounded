@@ -109,6 +109,7 @@ kill_arg() {
 }
 
 
+
 start_run() {
   if [ -z "$command" ]; then
     echo "you must specify a command" >&2
@@ -125,8 +126,13 @@ start_run() {
   # if you don't do this, and the parent exits, the group can't be killed.
   set -m
 
-  # disown so the child runs no matter what happens to the parent
-  bin/_run_background_task "$fpid" "$flog" "$command" >>"$flog" 2>&1 </dev/null & disown
+  # start a subprocess so we can disown it
+  (
+    [ -z "$BASHPID" ] && BASHPID="$(sh -c 'echo $PPID')"
+    echo "$BASHPID" > "$fpid"
+    trap "rm -f '$fpid'" INT TERM EXIT
+    bash -c -l "$command"
+  ) >>"$flog" 2>&1 </dev/null & disown
 }
 
 status_run() {
