@@ -65,7 +65,6 @@ You can also run individual tests by launching them directly.
 
 ## Roadmap
 
-* test status command
 * simplify script, 170 lines is too many
 * allow caller to choose whether to kill existing processes, to block until they finish, or just to exit
 * make it optional whether we fire up a login shell or not?

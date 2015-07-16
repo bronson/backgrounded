@@ -55,38 +55,27 @@ perform_status() {
 }
 
 
+attempt_kill() {
+  if [ -f "$1" ]; then
+    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
+      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
+      rm -f "$1"
+    else
+      echo "$(date +%FT%T%z) asking process $(cat "$1") pid '$1' to $2"
+      kill -"$2" -"$(cat "$1")"
+      sleep $3
+    fi
+  fi
+  [ ! -f "$1" ] && return 0
+}
+
 perform_kill() {
-  if [ -f "$1" ]; then
-    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
-      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
-      rm -f "$1"
-    else
-      echo "$(date +%FT%T%z) asking process $(cat "$1") pid '$1' to terminate"
-      kill -TERM -"$(cat "$1")"
-      sleep 2
-    fi
-  fi
-
-  if [ -f "$1" ]; then
-    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
-      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
-      rm -f "$1"
-    else
-      echo "$(date +%FT%T%z) trying to destroy $(cat "$1") pid '$1'"
-      kill -9 -"$(cat "$1")"
-      sleep 5
-    fi
-  fi
-
-  if [ -f "$1" ]; then
-    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
-      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
-      rm -f "$1"
-    else
-      echo "$(date +%FT%T%z) could not destroy $(cat "$1") pid '$1'. Aborting!"
-      exit 2
-    fi
-  fi
+  attempt_kill "$1" TERM 1 ||
+  attempt_kill "$1" TERM 1 ||
+  attempt_kill "$1" KILL 1 ||
+  attempt_kill "$1" KILL 2 ||
+  attempt_kill "$1" KILL 4 ||
+  exit 2
 }
 
 
