@@ -27,11 +27,7 @@ backgrounded 'echo $$: `date`; sleep 1'
 This starts the given command and detaches it from your session.
 It also makes it the process group leader so any subprocesses it starts will
 be terminated too.  Since you didn't give the command a name, the
-pidfile will be named `background.pid`.
-
-But why wasn't there any output??  Because it detached from your session.
-The output disappeared into the void.
-If you redirect to a file, you'll see it's alive and well.
+pidfile will be named `background.pid` and all .
 
 ```bash
 backgrounded 'echo $$: `date` >> /tmp/log; sleep 1'
@@ -49,8 +45,8 @@ You can run multiple processes if you give them a name.
 ```bash
 backgrounded rapidtask 'echo $$: `date`; sleep 0.5'
 backgrounded lazytask 'echo $$: `date`; sleep 2'
-backgrounded status lazytask
-backgrounded kill rapidtask lazytask
+backgrounded status rapidtask lazytask
+backgrounded stop rapidtask lazytask
 ```
 
 backgrounded logs to its stdout.  You can redirect its stdout to

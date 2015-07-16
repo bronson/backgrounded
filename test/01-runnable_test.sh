@@ -5,14 +5,14 @@
 
 set -e
 . test/test-helper.sh
-prepare_files a.pid a.log
+prepare_files background-task.pid backgrounded-task.log
 
-# processes are running concurrently if 'launcher' appears before 'task'
-bin/backgrounded a.pid a.log 'sleep 0.1; echo task'
-echo launcher >> a.log
+# if 'launcher' appears before 'task' then processes ran concurrently
+bin/backgrounded 'sleep 0.1; echo task'
+echo launcher >> backgrounded-task.log
 
-block_until a.pid exists
-block_until a.pid does_not_exist
+block_until background-task.pid exists
+block_until background-task.pid does_not_exist
 
 expected="launcher
 task"

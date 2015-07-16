@@ -1,36 +1,146 @@
 #!/usr/bin/env bash
 #
-# Runs the given commands in the background, detached from the terminal.
+# Runs a task in the background, detached from the terminal.
+#       backgrounded [options] [operation] [name] command
 #
-#   usage: start_background_task renderjob "sleep 10; bundle exec rake render"
+#   backgrounded "sleep 10; bundle exec rake render"
+#      launches a simple command, creates backgrounded.pid and backgrounded.log
+#   backgrounded kill
 #
-# It kills any existing _renderjob_ processes, detaches from the
-# terminal, turns off SIGHUP, writes a pidfile, runs the command,
-# then cleans up the pidfile when it's done.
+#   backgrounded render "sleep 10; bundle exec rake render"
+#      launched with render.pid and render.log (both files creaded in basedir)
+#   backgrounded kill render
+#
+#   backgrounded --pidfile=log/r.pid bgtask ./my-background-task
+#       you can specify a different pidfile and logfile
+#   backgrounded kill --pidfile=pf.pid
+#   backgrounded kill --pidfile=pf.pid bgtask
+#
+# start: kills an existing backgrounded process if a pidfile is found,
+#        then detaches from the terminal, turns off SIGHUP, writes the
+#        pidfile, runs the command, and cleans up the pidfile when it's done.
+# status: prints a message and sets an exit code depending on whether
+#        the backgrounded task is still running.
+# kill: does everything in its power to stop the task.  Asks politely
+#       at first, then gets more forceful.
 #
 # As crazy as this is, it's more reliable than running nohup,
-# and it runs everywhere, unlike setsid and friends.
+# and it runs everywhere unlike setsid and friends.
 
 
-pidfile="$1"
-logfile="$2"
-cmd="$3"
+find_file() {
+  eval fn=\$${1}file
+  if [ -n "$fn" ];
+    then echo "$fn"
+  elif [ -n "$name" ];
+    then echo "$basedir/$name.$1"
+  else
+    echo "backgrounded-task.$1"
+  fi
+}
 
-if [ -z "$pidfile" -o -z "$logfile" -o -z "$cmd" ]; then
-  echo usage: start_background_task pidfile logfile command
-  exit 1
+
+do_status() {
+  if [ -f "$1" ]; then
+    if kill -0 "$(cat "$1")" 2>/dev/null; then
+      echo "running"
+      return 0
+    fi
+    rm -f "$1"
+  fi
+
+  echo "stopped"
+  return 1
+}
+
+
+do_kill() {
+  if [ -f "$1" ]; then
+    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
+      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
+      rm -f "$1"
+    else
+      echo "$(date +%FT%T%z) asking process $(cat "$1") pid '$1' to terminate"
+      kill -TERM -"$(cat "$1")"
+      sleep 2
+    fi
+  fi
+
+  if [ -f "$1" ]; then
+    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
+      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
+      rm -f "$1"
+    else
+      echo "$(date +%FT%T%z) trying to destroy $(cat "$1") pid '$1'"
+      kill -9 -"$(cat "$1")"
+      sleep 5
+    fi
+  fi
+
+  if [ -f "$1" ]; then
+    if ! kill -0 "$(cat "$1")" 2>/dev/null; then
+      echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
+      rm -f "$1"
+    else
+      echo "$(date +%FT%T%z) could not destroy $(cat "$1") pid '$1'. Aborting!"
+      exit 2
+    fi
+  fi
+}
+
+
+start_arg() {
+  if [ -n "$name" ]; then echo "too many arguments" >&2; exit 1; fi
+  if [ -n "$command" ]; then name="$command"; fi
+  command="$1"
+}
+
+status_arg() {
+  do_status "$(find_file pid)"
+}
+
+kill_arg() {
+  do_kill "$(find_file pid)"
+}
+
+
+basedir='.'
+operation=start
+while [ -n "$1" ]; do
+  case "$1" in
+    -d) basedir="$2"; shift 2;;
+    -p) pidfile="$2"; shift 2;;
+    -l) logfile="$2"; shift 2;;
+
+    --basedir=*) basedir="${1#--basedir=}"; shift 1;;
+    --pidfile=*) pidfile="${1#--pidfile=}"; shift 1;;
+    --logfile=*) logfile="${1#--logfile=}"; shift 1;;
+    --basedir|--pidfile|--logfile) echo "$1 requires an argument" >&2; exit 1;;
+
+    start|status|kill) operation="$1"; shift 1;;
+    stop) operation=kill; shift 1;;
+
+    -*) echo "unknown option: $1" >&2; exit 1;;
+
+    *) "$operation"_arg "$@"; arguments+=" $1"; shift 1 ;;
+  esac
+done
+
+
+if [ "$operation" = start ]; then
+  # putting this inside a function can be a little funky so do it top-level.
+ 
+  if [ -z "$command" ]; then
+    echo "you must specify a command" >&2
+    exit 1
+  fi
+
+  do_kill
+
+  # set monitor mode so the child becomes a process group leader.
+  # if you don't do this, and the parent exits, the group can't be killed.
+  set -m
+
+  # disown so the child runs no matter what happens to the parent
+  bin/_run_background_task "$(find_file pid)" "$(find_file log)" "echo" >>"$(find_file log)" 2>&1 </dev/null & disown
 fi
-
-# set monitor mode so the child becomes a process group leader.
-# if you don't do this, and the parent exits, the group can't be killed.
-set -m
-
-# disown so the child runs no matter what happens to the parent
-bin/_run_background_task "$@" >>"$logfile" 2>&1 </dev/null & disown
-
-
-# NOTES:
-#
-# example commands to figure out -m:
-# bash -c 'set -m; echo parent=$$; bash -c '\''echo $$ | tee /tmp/pid; sleep 20; echo $$ done'\'' & disown'; sleep 1; kill -- -$(cat /tmp/pid)
-# bash -c -i 'bash -c '\''echo $$; sleep 10 & disown'\'' > /tmp/x'; kill -TERM -- -$(< /tmp/x)

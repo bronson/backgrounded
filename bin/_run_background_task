@@ -11,11 +11,6 @@ cmd="$3"
 # should probably let the client handle logging on its own
 # echo "$(date +%FT%T%z) $$ starting task: $cmd"
 
-if ! bin/kill_background_task "$pidfile"; then
-  echo "aborting because we couldn't terminate '$pidfile'"
-  exit 2
-fi
-
 echo "$$" > "$pidfile"
 trap "rm -f '$pidfile'" INT TERM EXIT
 
