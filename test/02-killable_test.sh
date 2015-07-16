@@ -5,20 +5,17 @@
 
 set -e
 . test/test-helper.sh
-prepare_files a.log
+prepare_files a.pid a.log
 
 # 'launcher' should come before 'task' in the logfile
 bin/backgrounded a.pid a.log 'echo start >> a.log; sleep 10; echo task'
 
-# wait for subprocess to log its start
-while [ ! -f a.log ]; do sleep 0.1; done
-while ! grep -q start a.log; do sleep 0.1; done
+block_until a.log contains start
 
 echo 'double the killer' >> a.log
 bin/kill_background_task a.pid > /dev/null
 
-# wait for subprocess to stop (on mac it's at least 0.5 seconds)
-while [ -f a.pid ]; do sleep 0.1; done
+block_until a.pid does_not_exist
 
 expected="start
 double the killer"

@@ -13,15 +13,12 @@ EOL
 
 bin/backgrounded a.pid a.log 'exec bash task'
 
-# wait for subprocess to log its start
-while [ ! -f a.log ]; do sleep 0.1; done
-while ! grep -q start a.log; do sleep 0.1; done
+block_until a.log contains start
 
 echo 'double the killer' >> a.log
 bin/kill_background_task a.pid > /dev/null
 
-# wait for subprocess to stop (on mac it appears to be at least 0.5 seconds)
-while [ -f a.pid ]; do sleep 0.1; done
+block_until a.pid does_not_exist
 
 expected="start
 double the killer"

@@ -31,10 +31,30 @@ check_result() {
 }
 
 
-block_until_task_starts() {
-  while [ ! -f "$1" ]; do sleep 0.1; done
+block_until_timeout() {
+  sleep 0.1
+  if [ "$(date +'%s')" -ge "$block_until_timeout" ]; then
+    echo "$* timed out!"
+    exit 2
+  fi
 }
 
-block_until_task_stops() {
-  while [ -f "$1" ]; do sleep 0.1; done
+
+block_until() {
+  block_until_timeout="$(($(date +'%s') + 10))"  # this number is the timeout in seconds
+  case "$2" in
+    exists)
+      while [ ! -f "$1" ]; do block_until_timeout "$@"; done
+      ;;
+    does_not_exist|goes_away)
+      while [ -f "$1" ]; do block_until_timeout "$@"; done
+      ;;
+    contains)
+      block_until "$1" exists
+      while ! grep -q "$3" "$1"; do block_until_timeout "$@"; done
+      ;;
+    *)
+      echo "uknown block_until $2"
+      exit 1
+  esac
 }
