@@ -118,6 +118,7 @@ start_run() {
   fpid="$(find_file pid)"
   flog="$(find_file log)"
 
+  # exits if the kill wasn't successful
   perform_kill "$pidfile"
 
   # set monitor mode so the child becomes a process group leader.

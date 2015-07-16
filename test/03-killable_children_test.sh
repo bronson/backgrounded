@@ -5,22 +5,26 @@
 
 set -e
 . test/test-helper.sh
-prepare_files task a.log
+prepare_files task a.pid a.log
+
 
 cat > task <<EOL
-  echo start >> a.log
+  bash -c 'echo start child; sleep 0.3; echo child did-not-happen' &
 EOL
 
-bin/backgrounded a.pid a.log 'exec bash task'
+bin/backgrounded -p a.pid -l a.log 'bash task; sleep 0.3; echo parent did-not-happen'
 
-block_until a.log contains start
+block_until a.log contains 'start child'
 
 echo 'double the killer' >> a.log
-bin/kill_background_task a.pid > /dev/null
+bin/backgrounded kill -p a.pid > /dev/null
 
 block_until a.pid does_not_exist
 
-expected="start
+# give the children time to run to completion
+sleep 0.6
+
+expected="start child
 double the killer"
 
 # some systems output 'Terminated: 15' when the process is terminated, others don't.
