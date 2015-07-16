@@ -106,15 +106,15 @@ kill_arg() {
 
 basedir='.'
 operation=start
-while [ -n "$1" ]; do
+while [ $# -gt 0 ]; do
   case "$1" in
     -d) basedir="$2"; shift 2;;
     -p) pidfile="$2"; shift 2;;
     -l) logfile="$2"; shift 2;;
 
-    --basedir=*) basedir="${1#--basedir=}"; shift 1;;
-    --pidfile=*) pidfile="${1#--pidfile=}"; shift 1;;
-    --logfile=*) logfile="${1#--logfile=}"; shift 1;;
+    --basedir=*) basedir="${1#*=}"; shift 1;;
+    --pidfile=*) pidfile="${1#*=}"; shift 1;;
+    --logfile=*) logfile="${1#*=}"; shift 1;;
     --basedir|--pidfile|--logfile) echo "$1 requires an argument" >&2; exit 1;;
 
     start|status|kill) operation="$1"; shift 1;;
@@ -126,16 +126,15 @@ while [ -n "$1" ]; do
   esac
 done
 
-
 if [ "$operation" = start ]; then
   # putting this inside a function can be a little funky so do it top-level.
- 
+
   if [ -z "$command" ]; then
     echo "you must specify a command" >&2
     exit 1
   fi
 
-  do_kill
+  do_kill "$(find_file pid)"
 
   # set monitor mode so the child becomes a process group leader.
   # if you don't do this, and the parent exits, the group can't be killed.
