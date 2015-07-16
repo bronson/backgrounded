@@ -14,7 +14,7 @@ cat > task <<EOL
   bash -c 'echo start child; sleep 0.3; echo child did-not-happen' &
 EOL
 
-bin/backgrounded -p a.pid -l a.log 'bash task; sleep 0.3; echo parent did-not-happen'
+bin/backgrounded -p a.pid -o a.log 'bash task; sleep 0.3; echo parent did-not-happen'
 
 block_until a.log contains 'start child'
 
