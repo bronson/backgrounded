@@ -28,6 +28,7 @@
 # and it runs everywhere unlike setsid and friends.
 
 
+# returns the name of the logfile or pidfile to use
 find_file() {
   eval fn=\$${1}file
   if [ -n "$fn" ];
@@ -40,21 +41,21 @@ find_file() {
 }
 
 
-do_status() {
+perform_status() {
   if [ -f "$1" ]; then
     if kill -0 "$(cat "$1")" 2>/dev/null; then
-      echo "running"
+      echo "$1 is running: $(cat "$1")"
       return 0
     fi
     rm -f "$1"
   fi
 
-  echo "stopped"
+  echo "$1 isn't running"
   return 1
 }
 
 
-do_kill() {
+perform_kill() {
   if [ -f "$1" ]; then
     if ! kill -0 "$(cat "$1")" 2>/dev/null; then
       echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
@@ -96,11 +97,43 @@ start_arg() {
 }
 
 status_arg() {
-  do_status "$(find_file pid)"
+  name="$1"
+  perform_status "$(find_file pid)"
+  status_done=yes
 }
 
 kill_arg() {
-  do_kill "$(find_file pid)"
+  name="$1"
+  perform_kill "$(find_file pid)"
+  kill_done=yes
+}
+
+
+start_run() {
+  if [ -z "$command" ]; then
+    echo "you must specify a command" >&2
+    exit 1
+  fi
+
+  fpid="$(find_file pid)"
+  flog="$(find_file log)"
+
+  perform_kill "$pidfile"
+
+  # set monitor mode so the child becomes a process group leader.
+  # if you don't do this, and the parent exits, the group can't be killed.
+  set -m
+
+  # disown so the child runs no matter what happens to the parent
+  bin/_run_background_task "$fpid" "$flog" "$command" >>"$flog" 2>&1 </dev/null & disown
+}
+
+status_run() {
+  [ -z "$status_done" ] && perform_status "$(find_file pid)"
+}
+
+kill_run() {
+  [ -z "$kill_done" ] && perform_kill "$(find_file pid)"
 }
 
 
@@ -126,23 +159,5 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ "$operation" = start ]; then
-  # putting this inside a function can be a little funky so do it top-level.
-
-  if [ -z "$command" ]; then
-    echo "you must specify a command" >&2
-    exit 1
-  fi
-
-  fpid="$(find_file pid)"
-  flog="$(find_file log)"
-
-  do_kill "$pidfile"
-
-  # set monitor mode so the child becomes a process group leader.
-  # if you don't do this, and the parent exits, the group can't be killed.
-  set -m
-
-  # disown so the child runs no matter what happens to the parent
-  bin/_run_background_task "$fpid" "$flog" "$command" >>"$flog" 2>&1 </dev/null & disown
-fi
+"$operation"_run
+exit 0 # ensure we return success

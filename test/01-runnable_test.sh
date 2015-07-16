@@ -11,11 +11,12 @@ prepare_files background-task.pid backgrounded-task.log
 bin/backgrounded 'sleep 0.1; echo task'
 echo launcher >> backgrounded-task.log
 
-block_until background-task.pid exists
-block_until background-task.pid does_not_exist
+block_until backgrounded-task.pid exists
+block_until backgrounded-task.pid does_not_exist
 
 expected="launcher
 task"
 
-actual="$(cat a.log)"
+actual="$(cat backgrounded-task.log)"
+
 check_result "$actual" "$expected"

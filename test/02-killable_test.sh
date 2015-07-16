@@ -5,21 +5,22 @@
 
 set -e
 . test/test-helper.sh
-prepare_files a.pid a.log
+prepare_files test-task.pid test-task.log
 
 # 'launcher' should come before 'task' in the logfile
-bin/backgrounded a.pid a.log 'echo start >> a.log; sleep 10; echo task'
+bin/backgrounded test-task 'echo start; sleep 5; echo better-not-happen'
 
-block_until a.log contains start
+block_until test-task.log contains start
 
-echo 'double the killer' >> a.log
-bin/kill_background_task a.pid > /dev/null
+echo 'double the killer' >> test-task.log
+bin/backgrounded kill test-task > /dev/null
 
-block_until a.pid does_not_exist
+block_until test-task.pid does_not_exist
 
 expected="start
 double the killer"
 
 # some systems output 'Terminated: 15' when the process is terminated, others don't.
-actual="$(cat a.log | grep -v '^Terminated')"
+actual="$(cat test-task.log | grep -v '^Terminated')"
+
 check_result "$actual" "$expected"
