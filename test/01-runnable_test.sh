@@ -7,7 +7,7 @@
 
 set -e
 . test/test-helper.sh
-prepare_files background-task.pid backgrounded-task.log
+prepare_files backgrounded-task.pid backgrounded-task.log
 
 # if 'launcher' appears before 'task' then processes ran concurrently
 bin/backgrounded 'sleep 0.1; echo task'

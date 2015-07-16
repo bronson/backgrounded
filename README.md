@@ -65,6 +65,8 @@ You can also run individual tests by launching them directly.
 
 ## Roadmap
 
+* close STDIN
+* handle process concurrency too, could use flock.
 * simplify script, 170 lines is too many
 * allow caller to choose whether to kill existing processes, to block until they finish, or just to exit
 * make it optional whether we fire up a login shell or not?
@@ -73,13 +75,8 @@ You can also run individual tests by launching them directly.
 
 ## Writing a Good Background Task
 
-suggest CDing to $HOME so you don't hold any FDs on volumes that can be unmounted.
+* You probably want to cd to $HOME so you don't hold any FDs on volumes that can be unmounted.
 
-TODO: ensure STDIN/OUT/ERR are all redirected to files.
+* You probably want to close all files before forking: `eval exec {3..255}\>\&-`
 
-It probably makes sense to close other files before forking.
-  close-fds() {
-    eval exec {3..255}\>\&-
-    }
-
-http://blog.n01se.net/blog-n01se-net-p-145.html
+* http://blog.n01se.net/blog-n01se-net-p-145.html

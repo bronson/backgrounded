@@ -7,7 +7,7 @@
 
 set -e
 . test/test-helper.sh
-prepare_files background-task.pid backgrounded-task.log
+prepare_files backgrounded-task.pid backgrounded-task.log
 
 bin/backgrounded status >> backgrounded-task.log
 echo "result was $?" >> backgrounded-task.log
@@ -19,7 +19,7 @@ block_until backgrounded-task.pid exists
 bin/backgrounded status >> backgrounded-task.log
 echo "result was $?" >> backgrounded-task.log
 
-bin/backgrounded kill >> background-task.log
+bin/backgrounded kill > /dev/null
 block_until backgrounded-task.pid does_not_exist
 
 bin/backgrounded status >> backgrounded-task.log
