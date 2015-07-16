@@ -3,13 +3,19 @@
 Maintain your background tasks.  Launch and gtfo.
 
 
+## Warning
+
+The functionality all works but I'm not happy with the amount of complexity
+caused by the argument parsing.  I'm going to take a machete to it, hopefully soon.
+
+
 ## Features
 
 * full service: start tasks, stop them, and get their status.
 * cross-platform
   * works with Bash 3 & 4 in any posix environment: Mac/Linux/BSD/etc.
-  * avoids nonstandard commands like setsid, start-stop-daemon, and nohup.
-* small, easy to understand, and well commented where it isn't.
+  * avoids poorly standardized commands like setsid, daemon, start-stop-daemon, and nohup.
+* small (TODO), easy to understand, and well commented where it isn't.
 * easy to embed in your project and use from the command line.
 
 
@@ -53,6 +59,16 @@ backgrounded logs to its stdout.  You can redirect its stdout to
 your logfile if you want to keep it or to /dev/null if you don't.
 
 
+## The Task
+
+When your task is run:
+
+* stdin is from /dev/null
+* both stdout and stderr go into the logfile
+* (TODO needs testing) HUP and INT are ignored.
+* It's the process group leader, so any forked processes are part of that group.
+
+
 ## Testing
 
 * `make test` (or just `make`)
@@ -65,7 +81,7 @@ You can also run individual tests by launching them directly.
 
 ## Roadmap
 
-* close STDIN
+* what about hup?  can the task handle hup?  (trap '' 1 2)  probably want to ignore INT.
 * handle process concurrency too, could use flock.
 * simplify script, 170 lines is too many
 * allow caller to choose whether to kill existing processes, to block until they finish, or just to exit
