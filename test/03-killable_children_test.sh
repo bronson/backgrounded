@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Ensure that killing the task kills off the task's children too
+#
 # this test fires off some children that sleep and then write...
 # if the children don't get killed before they write, the test fails.
 

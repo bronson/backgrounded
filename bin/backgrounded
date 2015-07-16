@@ -126,8 +126,7 @@ start_run() {
   # if you don't do this, and the parent exits, the group can't be killed.
   set -m
 
-  # start a subprocess so we can disown it
-  (
+  ( # start a subprocess so we can disown it
     [ -z "$BASHPID" ] && BASHPID="$(sh -c 'echo $PPID')"
     echo "$BASHPID" > "$fpid"
     trap "rm -f '$fpid'" INT TERM EXIT

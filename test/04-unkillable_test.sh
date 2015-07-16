@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ensure we can kill tasks
+# Ensure we can kill tasks that don't want to be killed
 
 # this test starts a background task that sleeps and then writes to the logfile.
 # the test passes if the background process is killed before it writes.
@@ -10,7 +10,7 @@ set -e
 prepare_files test-task.pid test-task.log
 
 # 'launcher' should come before 'task' in the logfile
-bin/backgrounded test-task 'echo start; sleep 5; echo better-not-happen'
+bin/backgrounded test-task 'trap "" INT TERM; echo start; sleep 1000; echo better-not-happen'
 
 block_until test-task.log contains start
 

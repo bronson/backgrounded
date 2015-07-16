@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Ensure we can run tasks in the background
+
 # this test starts a background task that sleeps and then writes to the logfile.
 # if the foreground writes complete before the background, the test passes.
 
