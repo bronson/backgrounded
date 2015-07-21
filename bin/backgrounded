@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+#   https://github.com/bronson/backgrounded
+#
 # Runs a task in the background, detached from the terminal.
 #       backgrounded [options] [operation] [name] command
 #

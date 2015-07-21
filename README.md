@@ -1,6 +1,6 @@
 ## Backgrounded [![Build Status](https://travis-ci.org/bronson/backgrounded.svg)](https://travis-ci.org/bronson/backgrounded)
 
-Maintain your background tasks.  Launch and gtfo.
+Start something.  Launch and gtfo.
 
 
 ## Warning
@@ -8,14 +8,16 @@ Maintain your background tasks.  Launch and gtfo.
 The functionality all works but I'm not happy with the amount of complexity
 caused by the argument parsing.  I'm going to take a machete to it, hopefully soon.
 
+## Overview
 
-## Features
+
+
+### Features
 
 * full service: start tasks, stop them, and get their status.
 * cross-platform
   * works with Bash 3 & 4 in any posix environment: Mac/Linux/BSD/etc.
   * avoids poorly standardized commands like setsid, daemon, start-stop-daemon, and nohup.
-* small (TODO), easy to understand, and well commented where it isn't.
 * easy to embed in your project and use from the command line.
 
 
@@ -66,7 +68,7 @@ When your task is run:
 * stdin is from /dev/null
 * both stdout and stderr go into the logfile
 * (TODO needs testing) HUP and INT are ignored.
-* It's the process group leader, so any forked processes are part of that group.
+* It's the process group leader, so any forked processes are part of your group.
 
 
 ## Testing
@@ -82,12 +84,10 @@ You can also run individual tests by launching them directly.
 ## Roadmap
 
 * what about hup?  can the task handle hup?  (trap '' 1 2)  probably want to ignore INT.
-* handle process concurrency too, could use flock.
 * simplify script, 170 lines is too many
 * allow caller to choose whether to kill existing processes, to block until they finish, or just to exit
 * make it optional whether we fire up a login shell or not?
-* make it possible to kill by sending an INT signal?
-
+* make it possible to run kill with arbitrary signals.
 
 ## Writing a Good Background Task
 
@@ -96,3 +96,14 @@ You can also run individual tests by launching them directly.
 * You probably want to close all files before forking: `eval exec {3..255}\>\&-`
 
 * http://blog.n01se.net/blog-n01se-net-p-145.html
+
+#### Process concurrency.
+
+It seems like the pidfile should ensure that only a single background task will ever be running.
+That's not completely true!  Thanks to Unix design, it's slightly racy.  As long as you're launching
+background processes occasionally (for example, when deploying an application), this should be good enough.
+
+If you have heavy contention, use a better locking technique like the
+[flock command](http://stackoverflow.com/questions/169964/how-to-prevent-a-script-from-running-simultaneously).
+If you run flock within your backgrounded task, you can be 100% certain that only a single copy can every be running at once.
+But, as noted before, most projects won't need this sort of guarantee.
