@@ -1,7 +1,6 @@
 ## Backgrounded [![Build Status](https://travis-ci.org/bronson/backgrounded.svg)](https://travis-ci.org/bronson/backgrounded)
 
-Start something.  Launch and gtfo.
-
+Start something.  Launch and gtfo.  Daemonize all the things.
 
 ## Warning
 
@@ -10,20 +9,24 @@ caused by the argument parsing.  I'm going to take a machete to it, hopefully so
 
 ## Overview
 
+This script makes it easy to start long-running process in the background
+and ensures it continues to run unmolested.  It also makes it easy for you
+to check on the long-running process or kill it.
 
 
 ### Features
 
-* full service: start tasks, stop them, and get their status.
-* cross-platform
-  * works with Bash 3 & 4 in any posix environment: Mac/Linux/BSD/etc.
+* full service: start tasks, stop them, get their status.
+* runs everywhere:
+  * pure Bash 3 & 4 so it works in any posix environment: Mac/Linux/BSD/etc.
   * avoids poorly standardized commands like setsid, daemon, start-stop-daemon, and nohup.
-* easy to embed in your project and use from the command line.
+* easy to embed in your project or use from the command line.
 
 
 ## Installation
 
-Clone the repo.  Or just copy the script file into your project -- it's just a single file.
+Clone the repo.  Or just copy [the script](https://github.com/bronson/backgrounded/blob/master/bin/backgrounded)
+into your project -- it's just a single file.
 
 
 ## Usage
@@ -80,9 +83,13 @@ You can also run individual tests by launching them directly.
 * `test/01-runnable_test.sh`
 * `test/03-killable_children_test.sh`
 
+This script uses [bashes](https://github.com/bronson/bashes)
+to ensure the continuous integration tests both Bash 3 and Bash 4.
+
 
 ## Roadmap
 
+* log starting and stopping events.  standardize logging.
 * what about hup?  can the task handle hup?  (trap '' 1 2)  probably want to ignore INT.
 * simplify script, 170 lines is too many
 * allow caller to choose whether to kill existing processes, to block until they finish, or just to exit

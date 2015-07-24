@@ -12,7 +12,7 @@ prepare_files backgrounded-task.pid backgrounded-task.log
 bin/backgrounded status >> backgrounded-task.log
 echo "result was $?" >> backgrounded-task.log
 
-bin/backgrounded 'sleep 1; echo will-not-happen'
+bin/backgrounded -q 'sleep 1; echo will-not-happen'
 
 block_until backgrounded-task.pid exists
 

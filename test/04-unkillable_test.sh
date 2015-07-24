@@ -10,7 +10,7 @@ set -e
 prepare_files test-task.pid test-task.log
 
 # 'launcher' should come before 'task' in the logfile
-bin/backgrounded test-task 'trap "" INT TERM; echo start; sleep 1000; echo better-not-happen'
+bin/backgrounded -q test-task 'trap "" INT TERM; echo start; sleep 1000; echo better-not-happen'
 
 block_until test-task.log contains start
 

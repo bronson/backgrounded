@@ -10,7 +10,7 @@ set -e
 prepare_files backgrounded-task.pid backgrounded-task.log
 
 # if 'launcher' appears before 'task' then processes ran concurrently
-bin/backgrounded 'sleep 0.1; echo task'
+bin/backgrounded -q 'sleep 0.1; echo task'
 echo launcher >> backgrounded-task.log
 
 block_until backgrounded-task.pid exists
