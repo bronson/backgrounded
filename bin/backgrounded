@@ -6,16 +6,16 @@
 #       backgrounded [options] [operation] [name] command
 #
 #   backgrounded "sleep 10; bundle exec rake render"
-#      launches a simple command, creates backgrounded.pid and backgrounded.log
+#      creates backgrounded.pid and backgrounded.log, then runs the command
 #   backgrounded kill
 #
 #   backgrounded render "sleep 10; bundle exec rake render"
-#      launched with render.pid and render.log (both files creaded in basedir)
+#      launched with render.pid and render.log
 #   backgrounded kill render
 #
 #   backgrounded --pidfile=log/r.pid bgtask ./my-background-task
 #       you can specify a different pidfile and logfile
-#   backgrounded kill --pidfile=pf.pid
+#   backgrounded kill --pidfile=pf.pid   # name is optional when you specify a pidfile
 #   backgrounded kill --pidfile=pf.pid bgtask
 #
 # start: kills an existing backgrounded process if a pidfile is found,
@@ -36,7 +36,7 @@ find_file() {
   if [ -n "$fn" ];
     then echo "$fn"
   elif [ -n "$name" ];
-    then echo "$basedir/$name.$1"
+    then echo "$name.$1"
   else
     echo "backgrounded-task.$1"
   fi
@@ -141,21 +141,18 @@ kill_run() {
 }
 
 
-basedir='.'
 operation=start
 while [ $# -gt 0 ]; do
   case "$1" in
-    -d) basedir="$2"; shift 2;;
     -p) pidfile="$2"; shift 2;;
     -o) logfile="$2"; shift 2;;
     -q) quiet=1; shift 1;;
 
     --quiet) quiet=1; shift 1;;
 
-    --basedir=*) basedir="${1#*=}"; shift 1;;
     --pidfile=*) pidfile="${1#*=}"; shift 1;;
     --logfile=*) logfile="${1#*=}"; shift 1;;
-    --basedir|--pidfile|--logfile) echo "$1 requires an argument" >&2; exit 1;;
+    --pidfile|--logfile) echo "$1 requires an argument" >&2; exit 1;;
 
     start|status|kill) operation="$1"; shift 1;;
     stop) operation=kill; shift 1;;
