@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 #
+#   backgrounded [start] [name] [--options] command
+#   backgrounded [kill|status] [name] [signal]
+#
 #   https://github.com/bronson/backgrounded
 #
 # Runs a task in the background, detached from the terminal.
@@ -29,30 +32,36 @@
 # As crazy as this is, it's more reliable than running nohup,
 # and it runs everywhere unlike setsid and friends.
 
+die() {
+  echo "$@" >&2
+  exit 1
+}
+
 
 # returns the name of the logfile or pidfile to use
 find_file() {
   eval fn=\$${1}file
-  if [ -n "$fn" ];
-    then echo "$fn"
-  elif [ -n "$name" ];
-    then echo "$name.$1"
+  if [ -n "$fn" ]; then
+    echo "$fn"
   else
-    echo "backgrounded-task.$1"
+    echo "$name.$1"
   fi
 }
 
 
-perform_status() {
-  if [ -f "$1" ]; then
-    if kill -0 "$(cat "$1")" 2>/dev/null; then
-      [ -z "$quiet" ] && echo "$1 is running: $(cat "$1")"
+run_status() {
+  [ -z "$name" ] && name="$argument"
+  [ -z "$name" ] && name=backgrounded-task
+  fpid="$(find_file pid)"
+  if [ -f "$fpid" ]; then
+    if kill -0 "$(cat "$fpid")" 2>/dev/null; then
+      [ -z "$quiet" ] && echo "$fpid is running: $(cat "$fpid")"
       return 0
     fi
-    rm -f "$1"
+    rm -f "$fpid"
   fi
 
-  [ -z "$quiet" ] && echo "$1 isn't running"
+  [ -z "$quiet" ] && echo "$fpid isn't running"
   return 1
 }
 
@@ -65,83 +74,59 @@ attempt_kill() {
     else
       [ -z "$quiet" ] && echo "$(date +%FT%T%z) asking process $(cat "$1") pid '$1' to $2"
       kill -"$2" -"$(cat "$1")"
-      sleep $3
+      sleep "$3"
     fi
   fi
   [ ! -f "$1" ] && return 0
 }
 
-perform_kill() {
-  attempt_kill "$1" TERM 1 ||
-  attempt_kill "$1" TERM 1 ||
-  attempt_kill "$1" KILL 1 ||
-  attempt_kill "$1" KILL 2 ||
-  attempt_kill "$1" KILL 4 ||
+run_kill() {
+  [ -z "$name" ] && name="$argument"
+  [ -z "$name" ] && name=backgrounded-task
+  fpid="$(find_file pid)"
+  run_status
+  attempt_kill "$fpid" TERM 1 ||
+  attempt_kill "$fpid" TERM 1 ||
+  attempt_kill "$fpid" KILL 1 ||
+  attempt_kill "$fpid" KILL 2 ||
+  attempt_kill "$fpid" KILL 4 ||
   exit 2
 }
 
 
-start_arg() {
-  if [ -n "$name" ]; then echo "too many arguments" >&2; exit 1; fi
-  if [ -n "$command" ]; then name="$command"; fi
-  command="$1"
-}
-
-status_arg() {
-  name="$1"
-  perform_status "$(find_file pid)"
-  status_done=yes
-}
-
-kill_arg() {
-  name="$1"
-  perform_kill "$(find_file pid)"
-  kill_done=yes
-}
-
-
-
-start_run() {
-  if [ -z "$command" ]; then
-    echo "you must specify a command" >&2
-    exit 1
-  fi
+run_start() {
+  [ -z "$name" ] && name=backgrounded-task
+  [ -z "$argument" ] && die "you must specify a command"
+  quiet=1 run_kill # exits if the kill wasn't successful
 
   fpid="$(find_file pid)"
   flog="$(find_file log)"
-
-  # exits if the kill wasn't successful
-  perform_kill "$pidfile"
 
   # set monitor mode so the child becomes a process group leader.
   # if you don't do this, and the parent exits, the group can't be killed.
   set -m
 
   ( # start a subprocess so we can disown it
-    [ -z "$quiet" ] && echo "$(date +%FT%T%z) pid=$BASHPID starting $command"
-
     [ -z "$BASHPID" ] && BASHPID="$(sh -c 'echo $PPID')"
     echo "$BASHPID" > "$fpid"
 
+    [ -z "$quiet" ] && echo "$(date +%FT%T%z) START backgrounded $BASHPID is starting: $argument"
+
     trap "rm -f '$fpid'" INT TERM EXIT
-    bash -c -l "$command" &
+    bash -c -l "$argument" &
     wait $!
 
-    [ -z "$quiet" ] && echo "$(date +%FT%T%z) pid=$BASHPID stopping $command"
+    [ -z "$quiet" ] && echo "$(date +%FT%T%z) STOP backgrounded $BASHPID is stopping: $argument"
     exit $?
   ) >>"$flog" 2>&1 </dev/null & disown
 }
 
-status_run() {
-  [ -z "$status_done" ] && perform_status "$(find_file pid)"
-}
-
-kill_run() {
-  [ -z "$kill_done" ] && perform_kill "$(find_file pid)"
-}
-
 
 operation=start
+case "$1" in
+  start|status|kill) operation="$1"; shift 1;;
+esac
+
 while [ $# -gt 0 ]; do
   case "$1" in
     -p) pidfile="$2"; shift 2;;
@@ -150,18 +135,21 @@ while [ $# -gt 0 ]; do
 
     --quiet) quiet=1; shift 1;;
 
+    -[A-Z]*) signal="${1#-}"; shift 1;;
+
     --pidfile=*) pidfile="${1#*=}"; shift 1;;
     --logfile=*) logfile="${1#*=}"; shift 1;;
-    --pidfile|--logfile) echo "$1 requires an argument" >&2; exit 1;;
+    --pidfile|--logfile) die "$1 requires an argument";;
 
-    start|status|kill) operation="$1"; shift 1;;
-    stop) operation=kill; shift 1;;
+    -*) die "unknown option: $1";;
 
-    -*) echo "unknown option: $1" >&2; exit 1;;
-
-    *) "$operation"_arg "$@"; arguments+=" $1"; shift 1 ;;
+    *)
+      [ -n "$argument" ] && name="$argument"
+      argument="$1"
+      shift 1
+      ;;
   esac
 done
 
-"$operation"_run
+run_"$operation"
 exit 0 # ensure we return success
