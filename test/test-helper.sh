@@ -34,6 +34,7 @@ check_result() {
 block_until_timeout() {
   sleep 0.1
   if [ "$(date +'%s')" -ge "$block_until_timeout" ]; then
+    echo
     echo "$0: '$*' timed out!"
     exit 2
   fi
