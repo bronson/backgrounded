@@ -60,9 +60,7 @@ attempt_kill() {
     elif [ -n "$1" ]; then
       [ -z "$quiet" ] && echo "$(date +%FT%T%z) asking process $(cat "$fpid") pid '$fpid' to $1"
       kill -"$1" -"$(cat "$fpid")"
-      result="$?"
       [ -n "$2" ] && sleep "$2"
-      return "$result"
     fi
   fi
   [ ! -f "$fpid" ] && return 0
@@ -81,10 +79,6 @@ run_status() {
 
 
 run_kill() {
-  if [ -n "$signal" ]; then
-    exit attempt_kill "$signal"
-  fi
-
   attempt_kill TERM 1 ||
   attempt_kill TERM 1 ||
   attempt_kill KILL 1 ||
@@ -135,7 +129,7 @@ while [ $# -gt 0 ]; do
 
     --quiet) quiet=1; shift 1;;
 
-    -[A-Z]*) signal="${1#-}"; shift 1;;
+    # -[A-Z]*) signal="${1#-}"; shift 1;;
 
     --pidfile=*) pidfile="${1#*=}"; shift 1;;
     --logfile=*) logfile="${1#*=}"; shift 1;;
