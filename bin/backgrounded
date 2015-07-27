@@ -48,30 +48,12 @@ find_file() {
   fi
 }
 
-
-run_status() {
-  [ -z "$name" ] && name="$argument"
-  [ -z "$name" ] && name=backgrounded-task
-  fpid="$(find_file pid)"
-  if [ -f "$fpid" ]; then
-    if kill -0 "$(cat "$fpid")" 2>/dev/null; then
-      [ -z "$quiet" ] && echo "$fpid is running: $(cat "$fpid")"
-      return 0
-    fi
-    rm -f "$fpid"
-  fi
-
-  [ -z "$quiet" ] && echo "$fpid isn't running"
-  return 1
-}
-
-
 attempt_kill() {
   if [ -f "$1" ]; then
     if ! kill -0 "$(cat "$1")" 2>/dev/null; then
       [ -z "$quiet" ] && echo "$(date +%FT%T%z) deleted stale pidfile '$1' for process $(cat "$1")"
       rm -f "$1"
-    else
+    elif [ -n "$3" ]; then
       [ -z "$quiet" ] && echo "$(date +%FT%T%z) asking process $(cat "$1") pid '$1' to $2"
       kill -"$2" -"$(cat "$1")"
       sleep "$3"
@@ -79,6 +61,22 @@ attempt_kill() {
   fi
   [ ! -f "$1" ] && return 0
 }
+
+
+run_status() {
+  [ -z "$name" ] && name="$argument"
+  [ -z "$name" ] && name=backgrounded-task
+  fpid="$(find_file pid)"
+
+  if quiet=1 attempt_kill "$fpid"; then
+    [ -z "$quiet" ] && echo "$fpid isn't running"
+    return 1
+  fi
+
+  [ -z "$quiet" ] && echo "$fpid is running: $(cat "$fpid")"
+  return 0
+}
+
 
 run_kill() {
   [ -z "$name" ] && name="$argument"
