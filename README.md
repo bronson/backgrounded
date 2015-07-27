@@ -96,13 +96,11 @@ to ensure the continuous integration tests both Bash 3 and Bash 4.
 
 ## Roadmap
 
-* merge attempt_kill and run_status
 * offer two modes: replace running task, and print error if already running
+* allow caller to choose whether to kill existing processes, to block until they finish, or just to exit
 * document that the pidfile is for the babysitter.  is there a way to get the pid of the actual child process?
 * what about hup?  can the task handle hup?  (trap '' 1 2)  probably want to ignore INT.
-* allow caller to choose whether to kill existing processes, to block until they finish, or just to exit
 * make it optional whether we fire up a login shell or not?
-* make it possible to run kill with arbitrary signals.
 
 ## Writing a Good Background Task
 

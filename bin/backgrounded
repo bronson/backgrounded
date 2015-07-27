@@ -129,8 +129,6 @@ while [ $# -gt 0 ]; do
 
     --quiet) quiet=1; shift 1;;
 
-    # -[A-Z]*) signal="${1#-}"; shift 1;;
-
     --pidfile=*) pidfile="${1#*=}"; shift 1;;
     --logfile=*) logfile="${1#*=}"; shift 1;;
     --pidfile|--logfile) die "$1 requires an argument";;
