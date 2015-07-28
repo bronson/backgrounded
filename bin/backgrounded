@@ -1,25 +1,20 @@
 #!/usr/bin/env bash
 #
-#   backgrounded [start] [name] [--options] command
-#   backgrounded [kill|status] [name] [signal]
-#
 #   https://github.com/bronson/backgrounded
 #
 # Runs a task in the background, detached from the terminal.
-#       backgrounded [options] [operation] [name] command
 #
+#   backgrounded [start] [name] [--options] command
+#   backgrounded [kill|status] [name] [signal]
+#
+# Examples:
 #   backgrounded "sleep 10; bundle exec rake render"
-#      creates backgrounded.pid and backgrounded.log, then runs the command
 #   backgrounded kill
-#
 #   backgrounded render "sleep 10; bundle exec rake render"
-#      launched with render.pid and render.log
+#   backgrounded status render   # `render.pid` contains the pid
 #   backgrounded kill render
-#
-#   backgrounded --pidfile=log/r.pid bgtask ./my-background-task
-#       you can specify a different pidfile and logfile
-#   backgrounded kill --pidfile=pf.pid   # name is optional when you specify a pidfile
-#   backgrounded kill --pidfile=pf.pid bgtask
+#   backgrounded --pidfile=/var/task.pid ./my-background-task
+#   backgrounded kill --pidfile=/var/task.pid
 #
 # start: kills an existing backgrounded process if a pidfile is found,
 #        then detaches from the terminal, turns off SIGHUP, writes the
@@ -29,14 +24,18 @@
 # kill: does everything in its power to stop the task.  Asks politely
 #       at first, then gets more forceful.
 #
-# As crazy as this is, it's more reliable than running nohup,
+# --logfile: specifies the file to log to.  --logfile=/dev/null to ignore.
+# --pidfile: specifies the file to contain the pid.
+# --quiet: don't output status information, just errors.
+#
+# As crazy as this script is, it's more reliable than running nohup,
 # and it runs everywhere unlike setsid and friends.
+
 
 die() {
   echo "$@" >&2
   exit 1
 }
-
 
 # returns the name of the logfile or pidfile to use
 find_file() {
