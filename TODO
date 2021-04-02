@@ -1,0 +1,13 @@
+- Make it interactive!
+  - no need to quote command
+  - runs the command, then shows you a tail -f of the logfile
+  - control-c disconnects (obviously), re-running will reattach
+
+something like this:
+
+backgrounded  -> "no process running"
+backgrounded sleep 20 -> (hangs, but runs tail -f on logfile)
+control-c     -> 'detached, sleep 20 running in the background'
+backgrounded  -> 'reattached to sleep 20' (runs tail -f on logfile)
+control-c     -> 'detached, sleep 20 running in the background'
+backgrounded --kill -> 'killed sleep 20'
